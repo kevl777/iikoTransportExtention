@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iiko API Extension</title>
+    <style>
+      body {
+  font-family: Arial, sans-serif;
+  width: 300px;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  text-align: center;
+  color: #333;
+}
+
+input,
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#organizationList {
+  margin-top: 10px;
+}
+
+.org-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.org-item input[type="radio"] {
+  margin-right: 10px;
+}
+
+.org-item label {
+  flex-grow: 1; /* Позволяет тексту занимать всё доступное пространство */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.org-item div {
+  color: #555;
+  font-size: 14px;
+}
+
+.org-item strong {
+  font-size: 14px;
+}
+
+.org-item:hover {
+  background-color: #f0f0f0;
+}
+
+#terminalList,
+#paymentList,
+#orderTypeList,
+#menuList,
+#nomenclatureList {
+  background-color: #fff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 12px;
+  color: #333;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+
+
+    </style>
+  </head>
+  <body>
+    <h3>iiko API</h3>
+    <label for="apiKey">API Key:</label>
+    <input type="text" id="apiKey" placeholder="Введите API Key" />
+
+    <label for="token">Token:</label>
+    <input type="text" id="token" readonly />
+
+    <label for="organizationId">Organizations:</label>
+    <div id="organizationList"></div>
+
+    <div>
+      <button id="getOrgId">Получить данные организаций</button>
+    </div>
+    <div id="organizationList"></div>
+
+    <!-- Кнопки, которые скрываются -->
+    <div>
+      <button id="getTerminals">Получить терминалы</button>
+      <div id="terminalList"></div>
+      <button id="getPaymentTypes">Получить типы оплат</button>
+      <div id="paymentList"></div>
+      <button id="getOrderTypes">Получить типы заказов</button>
+      <div id="orderTypeList"></div>
+      <button id="getMenu">Получить меню</button>
+      <div id="menuList"></div>
+      <div>
+        <button id="getExternalMenuV2">Получить внешнее меню v2</button>
+      </div>
+      <div id="externalMenuV2List"></div>
+    </div>
+    <div>
+        <button id="getNomenclatureV2">Получить номенклатуру v2 (by id)</button>
+      </div>
+      <div id="nomenclatureList"></div>
+    </div>
+    <a id="downloadResults" href="#" style="display: block; text-align: center; margin-top: 20px;">Скачать результаты в txt</a>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

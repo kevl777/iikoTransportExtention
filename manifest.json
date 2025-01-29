@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "iiko API Extension",
+  "version": "1.0",
+  "description": "Получение токена и ID организации через API iiko",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "iiko API Extension"
+  },
+ "icons": {
+    "16": "ico/16x16.png",
+    "32": "ico/32x32.png",
+    "48": "ico/48x48.png",
+    "64": "ico/64x64.png",
+    "128": "ico/128x128.png"
+  }
+
+}
