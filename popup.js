@@ -21,25 +21,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("apiKey").focus();
 
-// Получение id организаций
-
+// Получение токена и данных организаций
 document.getElementById("getOrgId").addEventListener("click", async () => {
   const apiKey = document.getElementById("apiKey").value;
-
   if (!apiKey) {
     alert("Введите API Key");
     return;
   }
-
   try {
-    const tokenResponse = await fetch("http://localhost:3000/get-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ apiLogin: apiKey }),
-    });
-
+    // Получение токена
+    const tokenResponse = await fetch(
+      "https://api-ru.iiko.services/api/1/access_token",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiLogin: apiKey }),
+      }
+    );
     if (!tokenResponse.ok) {
       console.error(
         "Ошибка получения токена:",
@@ -48,22 +46,21 @@ document.getElementById("getOrgId").addEventListener("click", async () => {
       );
       throw new Error("Ошибка при получении токена");
     }
-
     const tokenData = await tokenResponse.json();
     const token = tokenData.token;
     document.getElementById("token").value = token;
 
+    // Получение списка организаций
     const orgResponse = await fetch(
-      "http://localhost:3000/get-organization-id",
+      "https://api-ru.iiko.services/api/1/organizations",
       {
-        method: "POST",
+        method: "GET",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token }),
       }
     );
-
     if (!orgResponse.ok) {
       console.error(
         "Ошибка получения данных организаций:",
@@ -80,35 +77,28 @@ document.getElementById("getOrgId").addEventListener("click", async () => {
     orgData.organizations.forEach((org) => {
       const listItem = document.createElement("div");
       listItem.className = "org-item";
-
       const radioId = `org-${org.id}`;
-
       const radio = document.createElement("input");
       radio.type = "radio";
       radio.name = "organization";
       radio.value = org.id;
       radio.id = radioId;
-
       const label = document.createElement("label");
       label.htmlFor = radioId;
-
       const nameDiv = document.createElement("strong");
       nameDiv.textContent = org.name;
-
       const idDiv = document.createElement("div");
       idDiv.textContent = `ID: ${org.id}`;
-
       const textContainer = document.createElement("div");
       textContainer.appendChild(nameDiv);
       textContainer.appendChild(idDiv);
-
       label.appendChild(radio);
       label.appendChild(textContainer);
-
       listItem.appendChild(label);
       orgList.appendChild(listItem);
     });
 
+    // Показываем остальные элементы
     const elementsToShow = [
       "getTerminals",
       "getPaymentTypes",
@@ -132,30 +122,26 @@ document.getElementById("getOrgId").addEventListener("click", async () => {
   }
 });
 
-// Функция для получения списка терминалов через прокси-сервер
+// Функция для получения списка терминалов
 document.getElementById("getTerminals").addEventListener("click", async () => {
   const selectedOrgId = document.querySelector(
     'input[name="organization"]:checked'
   );
   const token = document.getElementById("token").value;
-
   if (!selectedOrgId) {
     alert("Выберите организацию");
     return;
   }
-
   try {
     const terminalResponse = await fetch(
-      "http://localhost:3000/get-terminal-groups",
+      "https://api-ru.iiko.services/api/1/terminal_groups",
       {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          token,
-          organizationIds: [selectedOrgId.value],
-        }),
+        body: JSON.stringify({ organizationIds: [selectedOrgId.value] }),
       }
     );
 
@@ -169,7 +155,6 @@ document.getElementById("getTerminals").addEventListener("click", async () => {
     }
 
     const terminalData = await terminalResponse.json();
-
     const terminalList = document.getElementById("terminalList");
     terminalList.innerHTML = JSON.stringify(terminalData, null, 2);
   } catch (error) {
@@ -178,7 +163,7 @@ document.getElementById("getTerminals").addEventListener("click", async () => {
   }
 });
 
-// Функция для получения типов оплат через прокси-сервер
+// Функция для получения типов оплат
 document
   .getElementById("getPaymentTypes")
   .addEventListener("click", async () => {
@@ -186,24 +171,20 @@ document
       'input[name="organization"]:checked'
     );
     const token = document.getElementById("token").value;
-
     if (!selectedOrgId) {
       alert("Выберите организацию");
       return;
     }
-
     try {
       const paymentResponse = await fetch(
-        "http://localhost:3000/get-payment-types",
+        "https://api-ru.iiko.services/api/1/payment_types",
         {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            token,
-            organizationIds: [selectedOrgId.value],
-          }),
+          body: JSON.stringify({ organizationIds: [selectedOrgId.value] }),
         }
       );
 
@@ -217,7 +198,6 @@ document
       }
 
       const paymentData = await paymentResponse.json();
-
       const paymentList = document.getElementById("paymentList");
       paymentList.innerHTML = JSON.stringify(paymentData, null, 2);
     } catch (error) {
@@ -226,29 +206,32 @@ document
     }
   });
 
-// Функция для получения типов заказов через прокси-сервер
+// Функция для получения типов заказов
 document.getElementById("getOrderTypes").addEventListener("click", async () => {
   const selectedOrgId = document.querySelector(
     'input[name="organization"]:checked'
   );
   const token = document.getElementById("token").value;
-
   if (!selectedOrgId) {
     alert("Выберите организацию");
     return;
   }
-
   try {
-    const response = await fetch("http://localhost:3000/get-order-types", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token,
-        organizationIds: [selectedOrgId.value],
-      }),
-    });
+    const response = await fetch(
+      "https://api-ru.iiko.services/api/1/deliveries/order_types",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ organizationIds: [selectedOrgId.value] }),
+      }
+    );
 
-    if (!response.ok) throw new Error("Ошибка при получении типов заказов");
+    if (!response.ok) {
+      throw new Error("Ошибка при получении типов заказов");
+    }
 
     const data = await response.json();
     document.getElementById("orderTypeList").innerHTML = JSON.stringify(
@@ -261,29 +244,32 @@ document.getElementById("getOrderTypes").addEventListener("click", async () => {
   }
 });
 
-// Функция для получения меню через прокси-сервер
+// Функция для получения меню
 document.getElementById("getMenu").addEventListener("click", async () => {
   const selectedOrgId = document.querySelector(
     'input[name="organization"]:checked'
   );
   const token = document.getElementById("token").value;
-
   if (!selectedOrgId) {
     alert("Выберите организацию");
     return;
   }
-
   try {
-    const response = await fetch("http://localhost:3000/get-menu", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token,
-        organizationId: selectedOrgId.value,
-      }),
-    });
+    const response = await fetch(
+      "https://api-ru.iiko.services/api/1/nomenclature",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ organizationId: selectedOrgId.value }),
+      }
+    );
 
-    if (!response.ok) throw new Error("Ошибка при получении меню");
+    if (!response.ok) {
+      throw new Error("Ошибка при получении меню");
+    }
 
     const data = await response.json();
     document.getElementById("menuList").innerHTML = JSON.stringify(
@@ -296,7 +282,7 @@ document.getElementById("getMenu").addEventListener("click", async () => {
   }
 });
 
-// Функция для получения меню v2 через прокси сервер
+// Функция для получения внешнего меню v2
 document
   .getElementById("getExternalMenuV2")
   .addEventListener("click", async () => {
@@ -304,54 +290,48 @@ document
       'input[name="organization"]:checked'
     );
     const token = document.getElementById("token").value;
-
     if (!selectedOrgId) {
       alert("Выберите организацию");
       return;
     }
-
     try {
-      const response = await fetch(
-        "http://localhost:3000/get-external-menu-v2",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token,
-            organizationId: selectedOrgId.value,
-            externalMenuId: "",
-            priceCategoryId: "",
-            language: "ru",
-          }),
-        }
-      );
+      const response = await fetch("https://api-ru.iiko.services/api/2/menu", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          externalMenuId: "",
+          organizationIds: [selectedOrgId.value],
+          priceCategoryId: "",
+          version: 2,
+          language: "ru",
+          asyncMode: false,
+          startRevision: 0,
+        }),
+      });
 
-      if (!response.ok)
+      if (!response.ok) {
         throw new Error("Ошибка при получении внешнего меню v2");
+      }
 
       const data = await response.json();
-
-      console.log("Ответ от сервера:", data);
+      const menuList = document.getElementById("externalMenuV2List");
+      menuList.innerHTML = ""; // Очистка предыдущего списка
 
       if (Array.isArray(data.externalMenus)) {
-        const menuList = document.getElementById("externalMenuV2List");
-        menuList.innerHTML = ""; // Очистка предыдущего списка
-
         data.externalMenus.forEach((menu) => {
           const listItem = document.createElement("label");
           listItem.className = "menu-item";
-
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.name = "menuItem";
           checkbox.value = menu.id;
-
           const labelText = document.createElement("span");
           labelText.textContent = `${menu.id} - ${menu.name}`;
-
           listItem.appendChild(checkbox);
           listItem.appendChild(labelText);
-
           menuList.appendChild(listItem);
         });
       } else {
@@ -375,25 +355,24 @@ document
       'input[name="menuItem"]:checked'
     );
     const token = document.getElementById("token").value;
-
     if (!selectedOrgId) {
       alert("Выберите организацию");
       return;
     }
-
     if (!selectedMenuId) {
       alert("Выберите меню");
       return;
     }
-
     try {
       const response = await fetch(
-        "http://localhost:3000/get-nomenclature-v2",
+        "https://api-ru.iiko.services/api/2/menu/by_id",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            token,
             externalMenuId: selectedMenuId.value,
             organizationIds: [selectedOrgId.value],
             version: 2,
@@ -404,7 +383,9 @@ document
         }
       );
 
-      if (!response.ok) throw new Error("Ошибка при получении номенклатуры v2");
+      if (!response.ok) {
+        throw new Error("Ошибка при получении номенклатуры v2");
+      }
 
       const data = await response.json();
       document.getElementById("nomenclatureList").innerHTML = JSON.stringify(
@@ -417,6 +398,7 @@ document
     }
   });
 
+// Скачивание результатов в txt файл
 document.getElementById("downloadResults").addEventListener("click", () => {
   // Собираем значения полей
   const apiKey = document.getElementById("apiKey").value;
@@ -437,28 +419,20 @@ document.getElementById("downloadResults").addEventListener("click", () => {
   const fileContent = `
   === API Key ===
   ${apiKey}
-  
   === Token ===
   ${token}
-  
   === Organization ID ===
   ${organizationId}
-  
   === Терминалы ===
   ${terminalList}
-  
   === Типы оплат ===
   ${paymentList}
-  
   === Типы заказов ===
   ${orderTypeList}
-  
   === Меню ===
   ${menuList}
-  
   === Внешнее меню v2 ===
   ${externalMenuV2List}
-  
   === Номенклатура v2 ===
   ${nomenclatureList}
   `;
